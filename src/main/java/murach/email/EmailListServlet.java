@@ -1,56 +1,52 @@
 package murach.email;
 
-import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
 import murach.business.User;
 import murach.data.UserDB;
+
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public class EmailListServlet extends HttpServlet {
 
     @Override
-    protected void doPost(HttpServletRequest request,
-                          HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String url = "/src/HTML/index.html";
-
-        // get current action
+        String url = "/index.html";
         String action = request.getParameter("action");
         if (action == null) {
-            action = "join";  // default action
+            action = "join";
         }
 
-        // perform action and set URL to appropriate page
         if (action.equals("join")) {
-            url = "/index.html";;    // the "join" page
-        }
-        else if (action.equals("add")) {
-            // get parameters from the request
+            url = "/index.html";
+        } else if (action.equals("add")) {
             String firstName = request.getParameter("firstName");
             String lastName = request.getParameter("lastName");
             String email = request.getParameter("email");
 
-            // store data in User object and save User object in db
-            User user = new User(firstName, lastName, email);
-            UserDB.insert(user);
+            // Lấy IP của người dùng truy cập web
+            String ip = request.getHeader("X-Forwarded-For");
+            if (ip == null || ip.isEmpty()) {
+                ip = request.getRemoteAddr();
+            }
 
-            // set User object in request object and set URL
+            User user = new User(firstName, lastName, email);
+            UserDB.insert(user, ip);
+
             request.setAttribute("user", user);
-            url = "/thanks.jsp";   // the "thanks" page
+            url = "/thanks.jsp";
         }
 
-        // forward request and response objects to specified URL
-        getServletContext()
-                .getRequestDispatcher(url)
-                .forward(request, response);
+        getServletContext().getRequestDispatcher(url).forward(request, response);
     }
+
     @Override
-    protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         doPost(request, response);
     }
 }
-
