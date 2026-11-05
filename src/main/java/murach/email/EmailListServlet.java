@@ -24,7 +24,7 @@ public class EmailListServlet extends HttpServlet {
 
         // perform action and set URL to appropriate page
         if (action.equals("join")) {
-            url = "/src/HTML/index.html";    // the "join" page
+            url = "/index.html";;    // the "join" page
         }
         else if (action.equals("add")) {
             // get parameters from the request
